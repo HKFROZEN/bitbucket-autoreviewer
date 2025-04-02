@@ -1,0 +1,3 @@
+*.diff
+.vscode/*
+__pycache__/*
