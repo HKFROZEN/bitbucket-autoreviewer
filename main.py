@@ -13,8 +13,10 @@ def lambda_handler(event, context):
     
     bitbucket_client.get_pr_text(base_url,project_key,repo_slug,pr_id)
     bitbucket_client.get_pr_diff(base_url,project_key,repo_slug,pr_id)
-    bitbucket_client.split_patch_by_file()
-    chatgpt_client.check_day_usage()
+    diff_files = bitbucket_client.split_patch_by_file()
+    for diff_file in diff_files:
+        print(chatgpt_client.check_day_usage())
+        chatgpt_client.review_diff_file(diff_file)
     return ret
 
 event = {'base_url' : os.getenv('BASE_URL'),

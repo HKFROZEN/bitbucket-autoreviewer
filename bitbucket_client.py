@@ -5,6 +5,8 @@ from collections import defaultdict
 
 auth_token = os.getenv('BITBUCKET_TOKEN')
 g_pr_master_diff_file = 'pr_master_diff.diff'
+g_diff_dir = "diffs"
+
 def get_pr_text(baseurl,projectKey,repositorySlug,pullRequestId):
     url = f"{baseurl}/rest/api/latest/projects/{projectKey}/repos/{repositorySlug}/pull-requests/{pullRequestId}"
 
@@ -30,13 +32,14 @@ def split_patch_by_file():
             file_patches[current_file].append(line)
             line = f.readline()
         
-        
+    output_files = []
     for file_name, patch_lines in file_patches.items():
         output_file = file_name.replace("/", "_") + ".diff"
-        with open(output_file, "w", encoding="utf-8") as f:
+        output_files.append(output_file)
+        with open(f"{g_diff_dir}/{output_file}", "w", encoding="utf-8") as f:
             f.writelines(patch_lines)
-        print(f"Saved patch for {file_name} to {output_file}")
-    
+        #print(f"Saved patch for {file_name} to {output_file}")
+    return output_files
 
 def get_pr_diff(baseurl,projectKey,repositorySlug,pullRequestId):
     url = f"{baseurl}/rest/api/latest/projects/{projectKey}/repos/{repositorySlug}/pull-requests/{pullRequestId}.diff"
@@ -52,6 +55,9 @@ def get_pr_diff(baseurl,projectKey,repositorySlug,pullRequestId):
     )
 
     response.text
-    file = open(g_pr_master_diff_file,'w')
+    if not os.path.exists(g_diff_dir):
+        os.makedirs(g_diff_dir)
+    file = open(f"{g_diff_dir}/{g_pr_master_diff_file}",'w')
     file.write(response.text)
     file.close()
+    return f"{g_diff_dir}/{g_pr_master_diff_file}"
